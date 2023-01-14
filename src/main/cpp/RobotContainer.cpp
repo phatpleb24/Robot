@@ -29,7 +29,7 @@ void RobotContainer::ConfigureButtonBindings() {
 
 frc2::Command* RobotContainer::GetAutonomousCommand() {
   // An example command will be run in autonomous
-  frc::DifferentialDriveVoltageConstraint
+  frc::DifferentialDriveVoltageConstraint autoVoltageConstraint
   {
     frc::SimpleMotorFeedforward<units::meters>
     {
@@ -40,6 +40,7 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
   
   frc::TrajectoryConfig config(0.5_mps, 0.2_mps_sq);
   config.SetKinematics(frc::DifferentialDriveKinematics(DriveConstants::trackWidth));
+  config.AddConstraint(autoVoltageConstraint);
 
   auto trajectory = frc::TrajectoryGenerator::GenerateTrajectory(
     frc::Pose2d{0_m,0_m,0_deg},
@@ -48,6 +49,8 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
     config
   );
 
+
+  
   m_drive.resetOdometry(trajectory.InitialPose());
   frc2::RamseteCommand ramseteCommand
   {
@@ -59,7 +62,7 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
     [this]() {return m_drive.getWheelSpeed();},
     frc2::PIDController{0, 0, 0},
     frc2::PIDController{0, 0, 0},
-    [this](auto left, auto right){return m_drive.tankDriveVolts(left, right);},
+    [this](auto left, auto right){m_drive.tankDriveVolts(left, right);},
     {&m_drive}
   };
 
