@@ -19,8 +19,10 @@ void Drivetrain::Periodic() {
   m_field.SetRobotPose(m_odometry.GetPose());
   frc::SmartDashboard::PutNumber("Left Velocity", m_leftFrontMotor.GetSelectedSensorVelocity());
   frc::SmartDashboard::PutNumber("Right Velocity", m_rightFrontMotor.GetSelectedSensorVelocity());
-  frc::SmartDashboard::PutNumber("Left Voltage", m_leftFrontMotor.GetMotorOutputVoltage());
-  frc::SmartDashboard::PutNumber("Right Voltage", m_rightFrontMotor.GetMotorOutputVoltage());
+  frc::SmartDashboard::PutNumber("Left Front Voltage", m_leftFrontMotor.GetMotorOutputVoltage());
+  frc::SmartDashboard::PutNumber("Right Front Voltage", m_rightFrontMotor.GetMotorOutputVoltage());
+  frc::SmartDashboard::PutNumber("Left Follower Voltage", m_leftFollowerMotor.GetMotorOutputVoltage());
+  frc::SmartDashboard::PutNumber("Right Follower Voltage", m_rightFollowerMotor.GetMotorOutputVoltage());
 }
 
 void Drivetrain::ArcadeDrive(double xaxisSpeed, double zaxisRotate) {
@@ -32,14 +34,14 @@ void Drivetrain::SimulationPeriodic() {
   m_leftMasterSim.SetBusVoltage(frc::RobotController::GetInputVoltage());
   m_rightMasterSim.SetBusVoltage(frc::RobotController::GetInputVoltage());
 
-  m_drivetrainSim.SetInputs(m_leftMasterSim.GetMotorOutputLeadVoltage() * 1_V, -m_rightMasterSim.GetMotorOutputLeadVoltage() * 1_V);
+  m_drivetrainSim.SetInputs(-m_leftMasterSim.GetMotorOutputLeadVoltage() * 1_V, m_rightMasterSim.GetMotorOutputLeadVoltage() * 1_V);
 
   m_drivetrainSim.Update(20_ms);
 
-  m_leftMasterSim.SetIntegratedSensorRawPosition(DistanceToNativeUnits(m_drivetrainSim.GetLeftPosition()));
-  m_leftMasterSim.SetIntegratedSensorVelocity(VelocityToNativeUnits(m_drivetrainSim.GetLeftVelocity()));
-  m_rightMasterSim.SetIntegratedSensorRawPosition(DistanceToNativeUnits(-m_drivetrainSim.GetRightPosition()));
-  m_rightMasterSim.SetIntegratedSensorVelocity(VelocityToNativeUnits(-m_drivetrainSim.GetRightVelocity()));
+  m_leftMasterSim.SetIntegratedSensorRawPosition(DistanceToNativeUnits(-m_drivetrainSim.GetLeftPosition()));
+  m_leftMasterSim.SetIntegratedSensorVelocity(VelocityToNativeUnits(-m_drivetrainSim.GetLeftVelocity()));
+  m_rightMasterSim.SetIntegratedSensorRawPosition(DistanceToNativeUnits(m_drivetrainSim.GetRightPosition()));
+  m_rightMasterSim.SetIntegratedSensorVelocity(VelocityToNativeUnits(m_drivetrainSim.GetRightVelocity()));
   m_pidgeonSim.SetRawHeading(m_drivetrainSim.GetHeading().Degrees().value());
 }
 
@@ -61,11 +63,11 @@ void Drivetrain::Init()
   m_leftFollowerMotor.ConfigFactoryDefault();
 
   m_rightFollowerMotor.Follow(m_rightFrontMotor);
-  m_leftFollowerMotor.Follow(m_leftFollowerMotor);
+  m_leftFollowerMotor.Follow(m_leftFrontMotor);
 
-  m_rightFrontMotor.SetInverted(TalonFXInvertType::Clockwise);
+  m_rightFrontMotor.SetInverted(TalonFXInvertType::CounterClockwise);
   m_rightFollowerMotor.SetInverted(TalonFXInvertType::FollowMaster);
-  m_leftFrontMotor.SetInverted(TalonFXInvertType::CounterClockwise);
+  m_leftFrontMotor.SetInverted(TalonFXInvertType::Clockwise);
   m_leftFollowerMotor.SetInverted(TalonFXInvertType::FollowMaster);
 
   m_rightFrontMotor.ConfigSelectedFeedbackSensor(FeedbackDevice::IntegratedSensor);
@@ -113,7 +115,9 @@ units::meters_per_second_t Drivetrain::NativeUnitstoVelocityMPS(double sensorCou
 
 void Drivetrain::resetOdometry(frc::Pose2d pose)
 {
-  m_field.SetRobotPose(pose);
+  m_rightFrontMotor.SetSelectedSensorPosition(0);
+  m_rightFrontMotor.SetSelectedSensorPosition(0);
+  m_odometry.ResetPosition(pose, m_imu.GetRotation2d());
 }
 
 frc::Pose2d Drivetrain::getPose()

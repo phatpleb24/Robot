@@ -13,7 +13,10 @@
 #include <frc/controller/RamseteController.h>
 #include <frc2/command/RamseteCommand.h>
 #include <frc2/command/SequentialCommandGroup.h>
-#include<frc2/command/InstantCommand.h>
+#include <frc2/command/InstantCommand.h>
+#include <frc/Filesystem.h>
+#include <frc/trajectory/TrajectoryUtil.h>
+#include <wpi/fs.h>
 
 RobotContainer::RobotContainer(){
   // Initialize all of your commands and subsystems here
@@ -38,30 +41,35 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
     frc::DifferentialDriveKinematics(DriveConstants::trackWidth), 2_V
   };
   
-  frc::TrajectoryConfig config(0.5_mps, 0.2_mps_sq);
+  frc::TrajectoryConfig config(1.5_mps, 0.4_mps_sq);
   config.SetKinematics(frc::DifferentialDriveKinematics(DriveConstants::trackWidth));
   config.AddConstraint(autoVoltageConstraint);
 
   auto trajectory = frc::TrajectoryGenerator::GenerateTrajectory(
     frc::Pose2d{0_m,0_m,0_deg},
-    {/*frc::Translation2d{2_m,0_m}, frc::Translation2d{1_m,1_m}*/},
-    frc::Pose2d{100_m, 0_m, 0_deg},
+    {frc::Translation2d{2_m,0_m}/*, frc::Translation2d{1_m,1_m}*/},
+    frc::Pose2d{3_m, 5_m, 90_deg},
     config
   );
 
+  frc::Trajectory pathWeaverTraj;
+  fs::path deployDirectory = frc::filesystem::GetDeployDirectory();
+  deployDirectory = deployDirectory / "paht1.wpilib.json";
+  pathWeaverTraj = frc::TrajectoryUtil::FromPathweaverJson(deployDirectory.string());
 
+  m_drive.m_field.GetObject("traj")->SetTrajectory(pathWeaverTraj);
   
-  m_drive.resetOdometry(trajectory.InitialPose());
+  m_drive.resetOdometry(pathWeaverTraj.InitialPose());
   frc2::RamseteCommand ramseteCommand
   {
-    trajectory,
+    pathWeaverTraj,
     [this]() {return m_drive.getPose();},
     frc::RamseteController{},
     frc::SimpleMotorFeedforward<units::meters>{DriveConstants::kS, DriveConstants::kV, DriveConstants::kA},
     frc::DifferentialDriveKinematics(DriveConstants::trackWidth),
     [this]() {return m_drive.getWheelSpeed();},
-    frc2::PIDController{0, 0, 0},
-    frc2::PIDController{0, 0, 0},
+    frc2::PIDController{1.5, 0, 0},
+    frc2::PIDController{1.5, 0, 0},
     [this](auto left, auto right){m_drive.tankDriveVolts(left, right);},
     {&m_drive}
   };
@@ -69,6 +77,7 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
   return new frc2::SequentialCommandGroup(
       std::move(ramseteCommand),
       frc2::InstantCommand([this] { m_drive.tankDriveVolts(0_V, 0_V); }, {}));
+      //lmoo
 }
 
 frc2::Command* RobotContainer::TankDriveCommand()

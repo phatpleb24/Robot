@@ -24,6 +24,7 @@ class Drivetrain : public frc2::SubsystemBase {
   static constexpr double kGearRatio = 9.821;
   static constexpr units::inch_t kWhellRadiusInches = 4_in;
   static constexpr int k100msPerSecond = 10;
+  frc::Field2d m_field;
   Drivetrain();
 
   /**
@@ -52,10 +53,10 @@ class Drivetrain : public frc2::SubsystemBase {
   void UpdateOdometry();
   // Components (e.g. motor controllers and sensors) should generally be
   // declared private and exposed only through public methods.
-  WPI_TalonFX m_rightFrontMotor{3};
-  WPI_TalonFX m_rightFollowerMotor{4};
-  WPI_TalonFX m_leftFrontMotor{1};
-  WPI_TalonFX m_leftFollowerMotor{2};
+  WPI_TalonFX m_rightFrontMotor{1};
+  WPI_TalonFX m_rightFollowerMotor{2};
+  WPI_TalonFX m_leftFrontMotor{3};
+  WPI_TalonFX m_leftFollowerMotor{4};
   WPI_Pigeon2 m_imu{8};
 
 //  static constexpr  c = kWhellRadiusInches * 2 * wpi::numbers::pi;
@@ -64,7 +65,6 @@ class Drivetrain : public frc2::SubsystemBase {
   frc::DifferentialDrive diffDrive{m_leftFrontMotor, m_rightFrontMotor};
   frc::DifferentialDriveOdometry m_odometry{m_imu.GetRotation2d()};
 
-  frc::Field2d m_field;
 
   TalonFXSimCollection m_leftMasterSim {m_leftFrontMotor.GetSimCollection()};
   TalonFXSimCollection m_rightMasterSim {m_rightFrontMotor.GetSimCollection()};
