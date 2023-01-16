@@ -15,6 +15,7 @@
 #include <frc2/command/SequentialCommandGroup.h>
 #include <frc2/command/InstantCommand.h>
 #include <frc/Filesystem.h>
+#include <frc/geometry/Pose2d.h>
 #include <frc/trajectory/TrajectoryUtil.h>
 #include <wpi/fs.h>
 
@@ -57,12 +58,12 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
   deployDirectory = deployDirectory / "paht1.wpilib.json";
   pathWeaverTraj = frc::TrajectoryUtil::FromPathweaverJson(deployDirectory.string());
 
-  m_drive.m_field.GetObject("traj")->SetTrajectory(pathWeaverTraj);
+  m_drive.m_field.GetObject("traj")->SetTrajectory(trajectory);
   
-  m_drive.resetOdometry(pathWeaverTraj.InitialPose());
+  m_drive.resetOdometry(trajectory.InitialPose());
   frc2::RamseteCommand ramseteCommand
   {
-    pathWeaverTraj,
+    trajectory,
     [this]() {return m_drive.getPose();},
     frc::RamseteController{},
     frc::SimpleMotorFeedforward<units::meters>{DriveConstants::kS, DriveConstants::kV, DriveConstants::kA},

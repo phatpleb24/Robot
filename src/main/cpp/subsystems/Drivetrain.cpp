@@ -17,12 +17,12 @@ void Drivetrain::Periodic() {
   // Implementation of subsystem periodic method goes here.
   UpdateOdometry();
   m_field.SetRobotPose(m_odometry.GetPose());
-  frc::SmartDashboard::PutNumber("Left Velocity", m_leftFrontMotor.GetSelectedSensorVelocity());
+  /*frc::SmartDashboard::PutNumber("Left Velocity", m_leftFrontMotor.GetSelectedSensorVelocity());
   frc::SmartDashboard::PutNumber("Right Velocity", m_rightFrontMotor.GetSelectedSensorVelocity());
   frc::SmartDashboard::PutNumber("Left Front Voltage", m_leftFrontMotor.GetMotorOutputVoltage());
   frc::SmartDashboard::PutNumber("Right Front Voltage", m_rightFrontMotor.GetMotorOutputVoltage());
   frc::SmartDashboard::PutNumber("Left Follower Voltage", m_leftFollowerMotor.GetMotorOutputVoltage());
-  frc::SmartDashboard::PutNumber("Right Follower Voltage", m_rightFollowerMotor.GetMotorOutputVoltage());
+  frc::SmartDashboard::PutNumber("Right Follower Voltage", m_rightFollowerMotor.GetMotorOutputVoltage());*/
 }
 
 void Drivetrain::ArcadeDrive(double xaxisSpeed, double zaxisRotate) {
@@ -116,8 +116,11 @@ units::meters_per_second_t Drivetrain::NativeUnitstoVelocityMPS(double sensorCou
 void Drivetrain::resetOdometry(frc::Pose2d pose)
 {
   m_rightFrontMotor.SetSelectedSensorPosition(0);
-  m_rightFrontMotor.SetSelectedSensorPosition(0);
+  m_rightFollowerMotor.SetSelectedSensorPosition(0);
+  m_leftFollowerMotor.SetSelectedSensorPosition(0);
+  m_leftFrontMotor.SetSelectedSensorPosition(0);
   m_odometry.ResetPosition(pose, m_imu.GetRotation2d());
+  
 }
 
 frc::Pose2d Drivetrain::getPose()

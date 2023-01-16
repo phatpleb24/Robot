@@ -8,11 +8,13 @@
 #include <frc2/command/CommandScheduler.h>
 #include <frc/shuffleboard/ShuffleboardTab.h>
 #include <frc/shuffleboard/Shuffleboard.h>
+#include <frc/DataLogManager.h>
 
 void Robot::RobotInit()
 {
   SetNetworkTablesFlushEnabled(true);
-
+  
+  frc::DataLogManager::Start();
 }
 
 /**
