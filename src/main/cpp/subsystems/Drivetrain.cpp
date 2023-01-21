@@ -75,8 +75,8 @@ void Drivetrain::Init()
   m_leftFrontMotor.ConfigSelectedFeedbackSensor(FeedbackDevice::IntegratedSensor);
   m_leftFrontMotor.SetSelectedSensorPosition(0);
 
-  frc::SmartDashboard::PutData("Field", &m_field);
-  frc::SmartDashboard::PutData(&diffDrive);
+  //frc::SmartDashboard::PutData("Field", &m_field);
+  //frc::SmartDashboard::PutData(&diffDrive);
 }
 
 int Drivetrain::DistanceToNativeUnits(units::meter_t position)

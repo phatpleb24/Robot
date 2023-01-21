@@ -11,5 +11,5 @@ TeleopArcadeDrive::TeleopArcadeDrive(Drivetrain* subsystem, std::function<double
 
 void TeleopArcadeDrive::Execute()
 {
-    m_drive->ArcadeDrive(m_xAxisSpeed(), m_zAxisRotate());
+    m_drive->ArcadeDrive(m_xAxisSpeed()/5, m_zAxisRotate()/5);
 }

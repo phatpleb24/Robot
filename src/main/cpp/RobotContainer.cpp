@@ -28,7 +28,7 @@ RobotContainer::RobotContainer(){
 
 void RobotContainer::ConfigureButtonBindings() {
   // Configure your button bindings here
-  m_drive.SetDefaultCommand(TeleopArcadeDrive(&m_drive, [this] { return -m_joystick.GetRawAxis(1); } , [this] { return m_joystick.GetRawAxis(2); }));
+  m_drive.SetDefaultCommand(TeleopArcadeDrive(&m_drive, [this] { return -m_joystick.GetRawAxis(5); } , [this] { return m_joystick.GetRawAxis(4); }));
 }
 
 frc2::Command* RobotContainer::GetAutonomousCommand() {
@@ -42,7 +42,7 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
     frc::DifferentialDriveKinematics(DriveConstants::trackWidth), 2_V
   };
   
-  frc::TrajectoryConfig config(1.5_mps, 0.4_mps_sq);
+  frc::TrajectoryConfig config(0.5_mps, 0.4_mps_sq);
   config.SetKinematics(frc::DifferentialDriveKinematics(DriveConstants::trackWidth));
   config.AddConstraint(autoVoltageConstraint);
 
@@ -55,15 +55,15 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
 
   frc::Trajectory pathWeaverTraj;
   fs::path deployDirectory = frc::filesystem::GetDeployDirectory();
-  deployDirectory = deployDirectory / "paht1.wpilib.json";
+  deployDirectory = deployDirectory / "output" / "path2.wpilib.json";
   pathWeaverTraj = frc::TrajectoryUtil::FromPathweaverJson(deployDirectory.string());
 
-  m_drive.m_field.GetObject("traj")->SetTrajectory(trajectory);
+  //m_drive.m_field.GetObject("traj")->SetTrajectory(trajectory);
   
-  m_drive.resetOdometry(trajectory.InitialPose());
+  m_drive.resetOdometry(pathWeaverTraj.InitialPose());
   frc2::RamseteCommand ramseteCommand
   {
-    trajectory,
+    pathWeaverTraj,
     [this]() {return m_drive.getPose();},
     frc::RamseteController{},
     frc::SimpleMotorFeedforward<units::meters>{DriveConstants::kS, DriveConstants::kV, DriveConstants::kA},
@@ -72,7 +72,7 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
     frc2::PIDController{1.5, 0, 0},
     frc2::PIDController{1.5, 0, 0},
     [this](auto left, auto right){m_drive.tankDriveVolts(left, right);},
-    {&m_drive}
+    {&m_drive},
   };
 
   return new frc2::SequentialCommandGroup(
